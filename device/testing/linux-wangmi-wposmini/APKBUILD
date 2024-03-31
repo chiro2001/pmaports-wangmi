@@ -1,0 +1,115 @@
+# Maintainer: Minecrell <minecrell@minecrell.net>
+# Co-Maintainer: Nikita Travkin <nikita@trvn.ru>
+# Kernel config based on: arch/arm64/configs/msm8916_defconfig
+
+_flavor="wangmi-wposmini"
+pkgname=linux-$_flavor
+pkgver=6.6
+# When making kernel config changes please also submit a PR to
+# https://github.com/msm8916-mainline/linux/blob/master/kernel/configs/pmos.config
+# since the kernel config is regenerated on upgrades and all changes will be lost!
+pkgrel=3
+pkgdesc="Mainline kernel fork for WangMI WPOS MINI devices"
+arch="aarch64 armv7"
+url="https://github.com/msm8916-mainline/linux"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-community
+	pmb:kconfigcheck-uefi
+"
+makedepends="
+	bison
+	findutils
+	flex
+	gmp-dev
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	postmarketos-installkernel
+	dtbtool
+"
+replaces="linux-postmarketos-qcom-msm8909 linux-postmarketos-qcom-msm8939"
+
+# Architecture
+case "$CARCH" in
+	aarch64) _carch="arm64" ;;
+	arm*)    _carch="arm" ;;
+esac
+
+# Source
+_tag=v${pkgver//_/-}-msm8916
+source="
+	$pkgname-$_tag.tar.gz::$url/archive/$_tag.tar.gz
+	config-$_flavor.aarch64
+	config-$_flavor.armv7
+	dtbTool
+	0001-add-device-wangmi-wposmini-and-panel-st7710s.patch::https://pastebin.com/raw/zFxnSeuj
+"
+builddir="$srcdir/linux-${_tag#v}"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$CARCH" .config
+	cp "$srcdir/dtbTool" . && chmod +x dtbTool
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" KBUILD_BUILD_VERSION=$((pkgrel + 1 )) olddefconfig
+	make ARCH="$_carch" CC="${CC:-gcc}" KBUILD_BUILD_VERSION=$((pkgrel + 1 ))
+
+	# Generate master DTB (deviceinfo_bootimg_qcdt)
+	# ./dtbTool -s 2048 -p "scripts/dtc/" -o "arch/$_carch/boot/dt.img" "arch/$_carch/boot/" --verbose
+	# cp ./dt.img "arch/$_carch/boot/dt.img"
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+
+	_install_targets="modules_install dtbs_install"
+
+	if [ -e "$builddir/arch/$_carch/boot/vmlinuz.efi" ]; then
+		# ZBOOT EFI decompressor for EFI booting
+		install -Dm644 "$builddir/arch/$_carch/boot/vmlinuz.efi" \
+			"$pkgdir/boot/linux.efi"
+
+		# Old GZIP'd kernel image for boot.img compatibility
+		install -Dm644 "$builddir/arch/$_carch/boot/vmlinuz" \
+			"$pkgdir/boot/vmlinuz"
+	elif [ "$_carch" = "arm64" ]; then
+		echo "WARNING: CONFIG_ZBOOT not enabled!"
+		install -Dm644 "$builddir/arch/$_carch/boot/Image.gz" \
+			"$pkgdir/boot/vmlinuz"
+	elif [ "$_carch" = "arm" ]; then
+		install -Dm644 "$builddir/arch/$_carch/boot/zImage" \
+			"$pkgdir/boot/vmlinuz"
+	else
+		_install_targets="zinstall modules_install dtbs_install"
+	fi
+	
+	make $_install_targets \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_DTBS_PATH="$pkgdir"/boot/dtbs
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+	
+	# Master DTB (deviceinfo_bootimg_qcdt)
+	# install -Dm644 "$builddir/arch/$_carch/boot/dt.img" \
+	# 	"$pkgdir/boot/dt.img"
+}
+
+
+sha512sums="
+5fbbdf333412667e0a0e38dcc7e83f640bd5a1e0b07e1c7786ff3e18f17b9cdec088936263d68986b3869ee305cfcecdf22970134ca8fb8d2a2769874a5a4676  linux-wangmi-wposmini-v6.6-msm8916.tar.gz
+dc71b8aa1876410f995258906c9d0c83567945b018ae9b67375536083381d567fb44e0e2aa8d51d795e3cc290c8e6d78ee609fe2fc36af85c706a7280af7fc51  config-wangmi-wposmini.aarch64
+64245199905be10885f297b633a0d124bf385430c2089871a68cacb0be4f28d57a12d81aac1e41a3faf705379f661df20f96c8bab594863910fcc3692cb6366f  config-wangmi-wposmini.armv7
+5e7613a1c380c1e19913b5e9593b958222adacdaec1cb08f21d35d1e7d5378c5cc0ee1ae23b090e108222197ad6bf58d04ecc6704febe0995ae936e3419a2b9e  dtbTool
+eb79ef9b88d680338d207874800c2cc4eb5f00576b380097eca57adeeb7d8d2b893b1f233e461bfbf88056eb3a93065d11a200ce8b1ef415c5b54aa906fed21a  0001-add-device-wangmi-wposmini-and-panel-st7710s.patch
+"

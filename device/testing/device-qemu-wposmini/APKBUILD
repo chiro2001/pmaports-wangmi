@@ -1,0 +1,45 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-qemu-wposmini
+pkgdesc="WangMI WPOS Mini (QEMU)"
+pkgver=9
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+# arch="armv7"
+options="!check !archcheck"
+# linux-postmarketos-qcom-msm8916 / linux-wangmi-wposmini
+depends="postmarketos-base linux-wangmi-wposmini linux-firmware-none"
+# soc-qcom-msm8916 soc-qcom-msm8916-rproc-none
+makedepends="devicepkg-dev"
+source="deviceinfo modules-initfs"
+# subpackages="
+# 	$pkgname-nonfree-firmware:nonfree_firmware
+# "
+# _pmb_select="soc-qcom-msm8916-rproc"
+
+# Backwards compatibility for old kernel variant subpackages
+# replaces="$pkgname-kernel-mainline $pkgname-kernel-mainline-modem"
+# # replaces="$pkgname-kernel-mainline"
+# for pkg in $replaces; do provides="$provides $pkg=$pkgver-r$pkgrel"; done
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+# nonfree_firmware() {
+# 	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
+# 	depends="firmware-qcom-adreno-a300 msm-firmware-loader
+# 		 firmware-qcom-msm8916-wcnss firmware-xiaomi-wt88047-wcnss-nv
+# 		 firmware-qcom-msm8916-venus"
+# 	mkdir "$subpkgdir"
+# }
+
+sha512sums="
+6f0e1e395b584d9dd878f714508ca6ffb0c0c749d187df3f8998fa0d22233a0ce5fd2c57b458aa1aa3e793d08d2e8ae6d25f889c4ca8ed3508c70722ac586147  deviceinfo
+f9e0d480842f266bf9fce821523f0dc511e5a91f6a1874ceefde3072e82e6684f777406d597602c0bdbd2b2528c5599dcb113c4821711280d1ac916e3fe0cf13  modules-initfs
+"

@@ -8,20 +8,25 @@ url="https://postmarketos.org"
 license="MIT"
 arch="aarch64"
 options="!check !archcheck"
+# depends="postmarketos-base mkbootimg linux-wangmi-wposmini
 depends="postmarketos-base mkbootimg linux-postmarketos-qcom-msm8916
-	 soc-qcom-msm8916 soc-qcom-msm8916-rproc"
+	 soc-qcom-msm8916"
 makedepends="devicepkg-dev"
-source="deviceinfo modules-initfs"
-subpackages="
-	$pkgname-nonfree-firmware:nonfree_firmware
-"
-_pmb_select="soc-qcom-msm8916-rproc"
+source="deviceinfo modules-initfs qcom-wangmi-wposmini.dtb dev-wingtech-wt88047.dtb"
+# subpackages="
+# 	$pkgname-nonfree-firmware:nonfree_firmware
+# "
+# _pmb_select="soc-qcom-msm8916-rproc"
 
 # Backwards compatibility for old kernel variant subpackages
 replaces="$pkgname-kernel-mainline $pkgname-kernel-mainline-modem"
+# replaces="$pkgname-kernel-mainline"
 for pkg in $replaces; do provides="$provides $pkg=$pkgver-r$pkgrel"; done
 
 build() {
+	pwd && ls .
+	mkdir -p "/home/pmos/dtb"
+	cp -r *.dtb "/home/pmos/dtb/"
 	devicepkg_build $startdir $pkgname
 }
 
@@ -29,15 +34,17 @@ package() {
 	devicepkg_package $startdir $pkgname
 }
 
-nonfree_firmware() {
-	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
-	depends="firmware-qcom-adreno-a300 msm-firmware-loader
-		 firmware-qcom-msm8916-wcnss firmware-xiaomi-wt88047-wcnss-nv
-		 firmware-qcom-msm8916-venus"
-	mkdir "$subpkgdir"
-}
+# nonfree_firmware() {
+# 	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
+# 	depends="firmware-qcom-adreno-a300 msm-firmware-loader
+# 		 firmware-qcom-msm8916-wcnss firmware-xiaomi-wt88047-wcnss-nv
+# 		 firmware-qcom-msm8916-venus"
+# 	mkdir "$subpkgdir"
+# }
 
 sha512sums="
-e34d4cf37a1f47a22915a11d3fae479348f378d49c3d8f7773eb0b891e488993a133d670d37fb080884a0945a280e5730ff8c8c0f00720551724a37bfb8d5520  deviceinfo
-7f6892125a15fdfcfca140571073150df25a5c355eae8ae632a56a00cd9e5fc7168d435680ca83eb8a8d9ae63aef6af478f42e92815f175d26ec592941de61e6  modules-initfs
+1af1f02549fa2fed2cfedea3809a92c1aa497a58cda81912a9bf2ab38d4573b05939d5844cf900382f85f1de9c73f43431f9d335732384714987261dff876f8c  deviceinfo
+1834302da3d0ea25b2d7a36c8ac2216f8db38b48b6d54cadfe007a0f41b925ea2f83fc5ad24623f7010c7366dd00686beb955e2839b8e044c73efe94c15414ec  modules-initfs
+07933e07272ce2808d6eb1253c367e6427536b907031b115371cd45597b237bcc5d29f43de7176d3cf5a23da72ee5e9dfe99dd08f653176b52d62ea06fbcecc8  qcom-wangmi-wposmini.dtb
+2f06898fc253be421f84ca56c3c9075221a7060d7301c2eaafad1243773a9e3ad8b11677e27419b79ef7f7872541b40c001a4fe2897dcd05bfdc10db5e9e1818  dev-wingtech-wt88047.dtb
 "
