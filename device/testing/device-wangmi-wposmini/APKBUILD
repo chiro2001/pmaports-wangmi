@@ -5,17 +5,21 @@ pkgver=9
 pkgrel=0
 url="https://postmarketos.org"
 license="MIT"
-# arch="aarch64"
-# arch="armv7"
 arch="aarch64 armv7"
 options="!check !archcheck"
-depends="postmarketos-base mkbootimg linux-wangmi-wposmini"
+depends="
+	postmarketos-base 
+	mkbootimg 
+	linux-wangmi-wposmini
+	soc-qcom-msm8916
+	soc-qcom-msm8916-rproc
+"
 makedepends="devicepkg-dev"
 source="deviceinfo modules-initfs"
 # subpackages="
 # 	$pkgname-nonfree-firmware:nonfree_firmware
 # "
-# _pmb_select="soc-qcom-msm8916-rproc"
+_pmb_select="soc-qcom-msm8916-rproc"
 
 # Backwards compatibility for old kernel variant subpackages
 # replaces="$pkgname-kernel-mainline $pkgname-kernel-mainline-modem"
@@ -39,6 +43,6 @@ package() {
 # }
 
 sha512sums="
-a25184a1292c6abf5ef372b354bf9d8a8c953d98b8df2e59bc77ed575a3af0b4377504fae6a07405bfd5bedf766a3c5190743dcdff863ec05bf6b884c9e968de  deviceinfo
+2798ecc9df738c7ffb7b422a3d1f92ece35ee3b997820a5c25e56ba9db06f81db64fd8a74259b0bf5d9542f65e89e400e53ae97ba3876207461a32e516d8ec78  deviceinfo
 d96f0b28650136a0e87ce2f0cbe4259f3c236bdb82e125afef14aa27481b07354ac6e757bdd0dfd9da35744de7c4b61f25979b8f52b7196d6ec8163900d2face  modules-initfs
 "
