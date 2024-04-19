@@ -1,0 +1,32 @@
+pkgname=firmware-wangmi-wposmini
+pkgver=1
+pkgrel=1
+pkgdesc="Firmware for WangMI WPOS Mini (Qualcomm MSM8916)"
+url="https://postmarketos.org/"
+subpackages="$pkgname-wcnss-nv:wcnss_nv"
+arch="aarch64 armv7"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+source="wposmini-WCNSS_qcom_wlan_nv.bin.base64::https://pastebin.com/raw/WaDKud93"
+
+_fwdir="/lib/firmware/postmarketos"
+
+build() {
+	# replace CRLF with LF
+	sed -i 's/\r$//g' wposmini-WCNSS_qcom_wlan_nv.bin.base64
+	base64 -d wposmini-WCNSS_qcom_wlan_nv.bin.base64 > WCNSS_qcom_wlan_nv.bin
+}
+
+package() {
+	# parent package is empty
+	mkdir -p "$pkgdir"
+}
+
+wcnss_nv() {
+	pkgdesc="WangMI WPOS MINI WiFi/BT firmware configuration"
+	install -Dm644 "$srcdir"/WCNSS_qcom_wlan_nv.bin -t "$subpkgdir/$_fwdir"/wlan/prima
+}
+
+sha512sums="
+ebba260e856884d6ecd83ce443fe0d7e0356b0fa0913eab092ac5766ec2e5cf6ac29b380774e3b9fa36943e1e50eaa79d3b1343ba5ef9ddb5799b6252c83f69d  wposmini-WCNSS_qcom_wlan_nv.bin.base64
+"

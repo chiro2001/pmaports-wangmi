@@ -16,14 +16,14 @@ depends="
 "
 makedepends="devicepkg-dev"
 source="deviceinfo modules-initfs"
-# subpackages="
-# 	$pkgname-nonfree-firmware:nonfree_firmware
-# "
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
 _pmb_select="soc-qcom-msm8916-rproc"
 
 # Backwards compatibility for old kernel variant subpackages
-# replaces="$pkgname-kernel-mainline $pkgname-kernel-mainline-modem"
-replaces="$pkgname-kernel-mainline"
+replaces="$pkgname-kernel-mainline $pkgname-kernel-mainline-modem"
+# replaces="$pkgname-kernel-mainline"
 for pkg in $replaces; do provides="$provides $pkg=$pkgver-r$pkgrel"; done
 
 build() {
@@ -34,15 +34,15 @@ package() {
 	devicepkg_package $startdir $pkgname
 }
 
-# nonfree_firmware() {
-# 	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
-# 	depends="firmware-qcom-adreno-a300 msm-firmware-loader
-# 		 firmware-qcom-msm8916-wcnss firmware-xiaomi-wt88047-wcnss-nv
-# 		 firmware-qcom-msm8916-venus"
-# 	mkdir "$subpkgdir"
-# }
+nonfree_firmware() {
+	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
+	depends="firmware-qcom-adreno-a300 msm-firmware-loader
+		 firmware-qcom-msm8916-wcnss firmware-wangmi-wposmini
+		 firmware-qcom-msm8916-venus"
+	mkdir "$subpkgdir"
+}
 
 sha512sums="
-2798ecc9df738c7ffb7b422a3d1f92ece35ee3b997820a5c25e56ba9db06f81db64fd8a74259b0bf5d9542f65e89e400e53ae97ba3876207461a32e516d8ec78  deviceinfo
-d96f0b28650136a0e87ce2f0cbe4259f3c236bdb82e125afef14aa27481b07354ac6e757bdd0dfd9da35744de7c4b61f25979b8f52b7196d6ec8163900d2face  modules-initfs
+2ec8100cceb427dd9c16718231f4e809060c1f1db38d56a5db3c51995f0992c1190cfbe5941ea90906f0f2c44bef0cb03eb83cd7a2ebc753bca34522cad0911b  deviceinfo
+e9553dbfcd1525c8ef4c5767192def2f79de4027f9ce828f4ac328855bd016685c99b2d94bf77aebc32a2d3f0016bea1d5659caab21f1e31f5d4b6c16d20cebe  modules-initfs
 "
